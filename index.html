@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f05d23">
+  <meta name="description" content="Odettes Wortspiel ist ein leicht startendes Wortspiel mit 10 Levels, Hinweisen, Sternen und lokalem Speichern.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Odettes Wortspiel">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+  <title>Odettes Wortspiel</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Wortspiel</p>
+        <h1>Odettes Wortspiel</h1>
+        <p class="subtitle">Bilde aus 5 Buchstaben die gesuchten Wörter.</p>
+      </div>
+      <div class="stats">
+        <div class="stat-chip">
+          <span>Level</span>
+          <strong id="levelBadge">1 / 10</strong>
+        </div>
+        <div class="stat-chip">
+          <span>Sterne</span>
+          <strong id="starBadge">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel intro-panel">
+        <div class="panel-header">
+          <p class="eyebrow">Spielstand</p>
+          <h2 id="levelTitle">Level 1</h2>
+        </div>
+        <p id="levelIntro" class="level-intro"></p>
+        <div class="level-strip" id="levelStrip" aria-label="Levelauswahl"></div>
+        <div class="save-card">
+          <h3>Fortschritt</h3>
+          <p>Dein aktuelles Spiel wird automatisch auf diesem Gerät gespeichert.</p>
+          <div class="save-actions">
+            <button id="exportButton" class="secondary-button" type="button">Backup speichern</button>
+            <label class="secondary-button file-button">
+              Backup laden
+              <input id="importInput" type="file" accept="application/json">
+            </label>
+            <button id="resetButton" class="ghost-button" type="button">Alles zurücksetzen</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel play-panel">
+        <div class="panel-header">
+          <p class="eyebrow">Buchstabenrad</p>
+          <h2>Baue dein Wort</h2>
+        </div>
+        <div class="entry-box" id="entryBox" aria-live="polite">Wähle Buchstaben</div>
+        <div class="wheel" id="letterWheel" aria-label="Buchstaben"></div>
+        <div class="controls">
+          <button id="clearButton" class="secondary-button" type="button">Leeren</button>
+          <button id="deleteButton" class="secondary-button" type="button">Löschen</button>
+          <button id="shuffleButton" class="secondary-button" type="button">Mischen</button>
+          <button id="submitButton" class="primary-button" type="button">Prüfen</button>
+        </div>
+        <p class="status-text" id="statusText">Tippe auf die Buchstaben oder nutze die Tastatur.</p>
+      </section>
+
+      <section class="panel words-panel">
+        <div class="panel-header">
+          <p class="eyebrow">Aufgaben</p>
+          <h2>Finde alle Wörter</h2>
+        </div>
+        <div id="wordList" class="word-list"></div>
+        <button id="nextLevelButton" class="primary-button wide-button" type="button" hidden>Nächstes Level</button>
+      </section>
+    </main>
+  </div>
+
+  <template id="wordCardTemplate">
+    <article class="word-card">
+      <button class="word-select" type="button">
+        <span class="word-number"></span>
+        <span class="word-clue"></span>
+        <span class="word-extra-one"></span>
+        <span class="word-extra-two"></span>
+        <span class="word-solution"></span>
+      </button>
+      <button class="hint-button secondary-button" type="button"></button>
+    </article>
+  </template>
+
+  <script src="levels.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

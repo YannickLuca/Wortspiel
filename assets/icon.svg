@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Odettes Wortspiel</title>
+  <desc id="desc">Symbol mit fünf Buchstabensteinen im Kreis.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff6ea"/>
+      <stop offset="100%" stop-color="#ffe0b7"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fff0d8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="172" fill="#fefaf3" stroke="#f05d23" stroke-opacity=".18" stroke-width="16"/>
+  <circle cx="256" cy="256" r="78" fill="#ffffff" stroke="#1f3b3a" stroke-opacity=".12" stroke-width="10"/>
+  <g font-family="'Gill Sans', 'Trebuchet MS', sans-serif" font-size="50" font-weight="700" text-anchor="middle">
+    <g transform="translate(256 90)">
+      <rect x="-46" y="-38" width="92" height="76" rx="24" fill="url(#tile)" stroke="#1f3b3a" stroke-opacity=".1"/>
+      <text y="18" fill="#1f3b3a">W</text>
+    </g>
+    <g transform="translate(400 190)">
+      <rect x="-46" y="-38" width="92" height="76" rx="24" fill="url(#tile)" stroke="#1f3b3a" stroke-opacity=".1"/>
+      <text y="18" fill="#1f3b3a">O</text>
+    </g>
+    <g transform="translate(346 362)">
+      <rect x="-46" y="-38" width="92" height="76" rx="24" fill="url(#tile)" stroke="#1f3b3a" stroke-opacity=".1"/>
+      <text y="18" fill="#1f3b3a">R</text>
+    </g>
+    <g transform="translate(166 362)">
+      <rect x="-46" y="-38" width="92" height="76" rx="24" fill="url(#tile)" stroke="#1f3b3a" stroke-opacity=".1"/>
+      <text y="18" fill="#1f3b3a">T</text>
+    </g>
+    <g transform="translate(112 190)">
+      <rect x="-46" y="-38" width="92" height="76" rx="24" fill="url(#tile)" stroke="#1f3b3a" stroke-opacity=".1"/>
+      <text y="18" fill="#1f3b3a">!</text>
+    </g>
+  </g>
+</svg>

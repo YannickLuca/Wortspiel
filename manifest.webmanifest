@@ -1,0 +1,29 @@
+{
+  "name": "Odettes Wortspiel",
+  "short_name": "Odette",
+  "description": "Ein statisches Wortspiel mit 10 Levels, Sternen, mehreren Hinweisen und lokalem Fortschritt.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7efe2",
+  "theme_color": "#f05d23",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
