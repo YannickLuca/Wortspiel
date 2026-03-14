@@ -23,9 +23,6 @@ const refs = {
   shuffleButton: document.getElementById("shuffleButton"),
   submitButton: document.getElementById("submitButton"),
   nextLevelButton: document.getElementById("nextLevelButton"),
-  resetButton: document.getElementById("resetButton"),
-  exportButton: document.getElementById("exportButton"),
-  importInput: document.getElementById("importInput"),
   wordCardTemplate: document.getElementById("wordCardTemplate")
 };
 
@@ -49,9 +46,6 @@ function bindEvents() {
   refs.shuffleButton.addEventListener("click", shuffleLetters);
   refs.submitButton.addEventListener("click", submitEntry);
   refs.nextLevelButton.addEventListener("click", moveToNextLevel);
-  refs.resetButton.addEventListener("click", resetProgress);
-  refs.exportButton.addEventListener("click", exportProgress);
-  refs.importInput.addEventListener("change", importProgress);
 
   document.addEventListener("keydown", (event) => {
     const tagName = event.target && event.target.tagName;
@@ -488,63 +482,6 @@ function moveToNextLevel() {
   saveState();
   render();
   setStatus(`Level ${state.currentLevel} gestartet.`);
-}
-
-function resetProgress() {
-  const confirmed = window.confirm("Wirklich den gesamten Spielstand löschen?");
-  if (!confirmed) {
-    return;
-  }
-
-  state = cloneFallbackState();
-  selectedAnswer = null;
-  currentEntry = "";
-  syncLetterOrder();
-  saveState();
-  render();
-  setStatus("Spielstand zurückgesetzt.");
-}
-
-function exportProgress() {
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    progress: state
-  };
-
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "odettes-wortspiel-backup.json";
-  link.click();
-  URL.revokeObjectURL(url);
-  setStatus("Backup-Datei erstellt.");
-}
-
-function importProgress(event) {
-  const file = event.target.files && event.target.files[0];
-  if (!file) {
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(String(reader.result));
-      state = sanitizeState(parsed.progress || parsed);
-      selectedAnswer = null;
-      currentEntry = "";
-      syncLetterOrder();
-      saveState();
-      render();
-      setStatus("Backup geladen.");
-    } catch (error) {
-      setStatus("Backup konnte nicht gelesen werden.");
-    } finally {
-      refs.importInput.value = "";
-    }
-  };
-  reader.readAsText(file);
 }
 
 function normalizeWord(value) {
