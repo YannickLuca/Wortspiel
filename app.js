@@ -443,7 +443,7 @@ function solveWord(levelId, answer, clue) {
   if (allSolved && levelId < LEVELS.length) {
     setStatus(`„${answer}“ gelöst. Level abgeschlossen. Nächstes Level ist frei.`);
   } else if (allSolved) {
-    setStatus(`„${answer}“ gelöst. Alle 10 Level sind geschafft.`);
+    setStatus(`„${answer}“ gelöst. Alle ${LEVELS.length} Level sind geschafft.`);
   } else {
     setStatus(`„${answer}“ gelöst. Stern erhalten. Hinweis war: ${clue}.`);
   }

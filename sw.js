@@ -1,4 +1,4 @@
-const CACHE_NAME = "odettes-wortspiel-cache-v2";
+const CACHE_NAME = "odettes-wortspiel-cache-v3";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",

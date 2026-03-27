@@ -1,12 +1,12 @@
 # Odettes Wortspiel
 
-Statisches Wortspiel für GitHub Pages mit 10 Levels, Sternen, zwei kaufbaren Zusatzhinweisen pro Wort und lokalem Speichern.
+Statisches Wortspiel für GitHub Pages mit 30 Levels, Sternen, zwei kaufbaren Zusatzhinweisen pro Wort und lokalem Speichern.
 
 ## Dateien
 
 - `index.html`: Layout der Website
 - `style.css`: Design fuer Desktop und Mobile
-- `levels.js`: Die ersten 10 Level mit Buchstaben, Zielwörtern und drei Hinweisstufen
+- `levels.js`: 30 Level mit Buchstaben, Zielwörtern und drei Hinweisstufen
 - `app.js`: Spiellogik, Speichern, Backup, Import und PWA-Registrierung
 - `manifest.webmanifest`: PWA-Metadaten
 - `sw.js`: Offline-Cache
