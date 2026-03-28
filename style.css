@@ -281,7 +281,7 @@ h1 {
 
 .controls {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 12px;
 }
@@ -366,6 +366,11 @@ h1 {
 
 .hint-button {
   width: 100%;
+}
+
+.hint-button.is-solved {
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
 .hint-button[disabled] {

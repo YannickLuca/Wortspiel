@@ -1,9 +1,10 @@
 const STORAGE_KEY = "odettes-wortspiel-progress-v2";
 const LEGACY_STORAGE_KEYS = ["wortstern-progress-v1"];
+const STARTING_STARS = 2;
 const FALLBACK_STATE = {
   currentLevel: 1,
   unlockedLevel: 1,
-  stars: 2,
+  stars: STARTING_STARS,
   solved: {},
   hintProgress: {}
 };
@@ -11,6 +12,8 @@ const FALLBACK_STATE = {
 const refs = {
   levelBadge: document.getElementById("levelBadge"),
   starBadge: document.getElementById("starBadge"),
+  earnedBadge: document.getElementById("earnedBadge"),
+  spentBadge: document.getElementById("spentBadge"),
   levelTitle: document.getElementById("levelTitle"),
   levelIntro: document.getElementById("levelIntro"),
   levelStrip: document.getElementById("levelStrip"),
@@ -19,8 +22,6 @@ const refs = {
   entryBox: document.getElementById("entryBox"),
   statusText: document.getElementById("statusText"),
   clearButton: document.getElementById("clearButton"),
-  deleteButton: document.getElementById("deleteButton"),
-  shuffleButton: document.getElementById("shuffleButton"),
   submitButton: document.getElementById("submitButton"),
   nextLevelButton: document.getElementById("nextLevelButton"),
   wordCardTemplate: document.getElementById("wordCardTemplate")
@@ -42,8 +43,6 @@ function initialize() {
 
 function bindEvents() {
   refs.clearButton.addEventListener("click", clearEntry);
-  refs.deleteButton.addEventListener("click", deleteLastLetter);
-  refs.shuffleButton.addEventListener("click", shuffleLetters);
   refs.submitButton.addEventListener("click", submitEntry);
   refs.nextLevelButton.addEventListener("click", moveToNextLevel);
 
@@ -121,12 +120,9 @@ function sanitizeState(input) {
     next.unlockedLevel = Math.min(input.unlockedLevel, LEVELS.length);
   }
 
-  if (Number.isInteger(input?.stars) && input.stars >= 0) {
-    next.stars = input.stars;
-  }
-
   next.solved = sanitizeSolvedBuckets(input?.solved);
   next.hintProgress = sanitizeHintProgress(input?.hintProgress, input?.extraHints);
+  syncStars(next);
 
   next.unlockedLevel = Math.max(next.unlockedLevel, getDerivedUnlockedLevel(next.solved));
   if (next.currentLevel > next.unlockedLevel) {
@@ -173,7 +169,7 @@ function sanitizeHintProgress(source, legacyExtraHints) {
       Object.entries(rawLevelProgress).forEach(([answer, stage]) => {
         const normalized = normalizeWord(answer);
         if (validAnswers.has(normalized) && Number.isInteger(stage) && stage >= 1) {
-          levelProgress[normalized] = Math.min(stage, 2);
+          levelProgress[normalized] = Math.min(stage, 3);
         }
       });
     }
@@ -208,8 +204,42 @@ function getDerivedUnlockedLevel(solvedBuckets) {
   return highestUnlocked;
 }
 
+function getCollectedStars(solvedSource = state.solved, hintSource = state.hintProgress) {
+  return LEVELS.reduce((total, level) => {
+    const solvedAnswers = Array.isArray(solvedSource[level.id]) ? solvedSource[level.id] : [];
+    const collectedForLevel = solvedAnswers.filter((answer) => getHintStageFromSource(hintSource, level.id, answer) < 3).length;
+    return total + collectedForLevel;
+  }, 0);
+}
+
+function getSpentStars(source = state.hintProgress) {
+  return LEVELS.reduce((total, level) => {
+    const levelHints = source[level.id];
+    if (!levelHints || typeof levelHints !== "object") {
+      return total;
+    }
+
+    const spentForLevel = Object.values(levelHints).reduce((sum, stage) => {
+      if (!Number.isInteger(stage) || stage < 1) {
+        return sum;
+      }
+
+      return sum + getSpentStarsForStage(stage);
+    }, 0);
+
+    return total + spentForLevel;
+  }, 0);
+}
+
+function syncStars(targetState = state) {
+  const collectedStars = getCollectedStars(targetState.solved, targetState.hintProgress);
+  const spentStars = getSpentStars(targetState.hintProgress);
+  targetState.stars = Math.max(0, STARTING_STARS + collectedStars - spentStars);
+}
+
 function saveState() {
   try {
+    syncStars();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (error) {
     setStatus("Der Browser konnte gerade nicht speichern. Dein Fortschritt bleibt bis zum Neuladen offen.");
@@ -224,13 +254,17 @@ function setSolvedAnswers(levelId, answers) {
   state.solved[levelId] = [...answers];
 }
 
-function getHintStage(levelId, answer) {
-  const levelHints = state.hintProgress[levelId];
+function getHintStageFromSource(source, levelId, answer) {
+  const levelHints = source[levelId];
   if (!levelHints) {
     return 0;
   }
 
-  return Math.min(levelHints[answer] || 0, 2);
+  return Math.min(levelHints[answer] || 0, 3);
+}
+
+function getHintStage(levelId, answer) {
+  return getHintStageFromSource(state.hintProgress, levelId, answer);
 }
 
 function setHintStage(levelId, answer, stage) {
@@ -238,15 +272,48 @@ function setHintStage(levelId, answer, stage) {
     state.hintProgress[levelId] = {};
   }
 
-  state.hintProgress[levelId][answer] = Math.min(Math.max(stage, 0), 2);
+  state.hintProgress[levelId][answer] = Math.min(Math.max(stage, 0), 3);
+}
+
+function getSpentStarsForStage(stage) {
+  if (stage >= 3) {
+    return 13;
+  }
+
+  if (stage === 2) {
+    return 3;
+  }
+
+  if (stage === 1) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function getHintUnlockCost(stage) {
+  if (stage === 1) {
+    return 1;
+  }
+
+  if (stage === 2) {
+    return 2;
+  }
+
+  return 0;
 }
 
 function render() {
   const level = getCurrentLevel();
   const solvedAnswers = getSolvedAnswers(level.id);
+  const collectedStars = getCollectedStars();
+  const spentStars = getSpentStars();
 
+  syncStars();
   refs.levelBadge.textContent = `${level.id} / ${LEVELS.length}`;
   refs.starBadge.textContent = String(state.stars);
+  refs.earnedBadge.textContent = String(collectedStars);
+  refs.spentBadge.textContent = String(spentStars);
   refs.levelTitle.textContent = `Level ${level.id}: ${level.title}`;
   refs.levelIntro.textContent = level.intro;
 
@@ -357,6 +424,7 @@ function renderWords() {
     });
 
     if (isSolved) {
+      hintButton.classList.add("is-solved");
       hintButton.textContent = "Gelöst";
       hintButton.disabled = true;
     } else if (hintStage === 0) {
@@ -364,11 +432,15 @@ function renderWords() {
       hintButton.disabled = false;
       hintButton.addEventListener("click", () => unlockHint(word.answer));
     } else if (hintStage === 1) {
-      hintButton.textContent = "Hinweis 3 für 1 Stern";
+      hintButton.textContent = "Hinweis 3 für 2 Sterne";
       hintButton.disabled = false;
       hintButton.addEventListener("click", () => unlockHint(word.answer));
+    } else if (hintStage === 2) {
+      hintButton.textContent = "Lösung für 10 Sterne";
+      hintButton.disabled = false;
+      hintButton.addEventListener("click", () => buySolution(word.answer));
     } else {
-      hintButton.textContent = "Alle Hinweise aktiv";
+      hintButton.textContent = "Lösung gekauft";
       hintButton.disabled = true;
     }
 
@@ -389,12 +461,6 @@ function clearEntry() {
 function deleteLastLetter() {
   currentEntry = currentEntry.slice(0, -1);
   renderEntry();
-}
-
-function shuffleLetters() {
-  letterOrder = [...letterOrder].sort(() => Math.random() - 0.5);
-  renderWheel();
-  setStatus("Buchstaben neu gemischt.");
 }
 
 function submitEntry() {
@@ -422,11 +488,12 @@ function submitEntry() {
   solveWord(level.id, matchedWord.answer, matchedWord.clue);
 }
 
-function solveWord(levelId, answer, clue) {
+function solveWord(levelId, answer, clue, options = {}) {
+  const purchasedSolution = options.purchasedSolution === true;
   const solvedAnswers = getSolvedAnswers(levelId);
   solvedAnswers.add(answer);
   setSolvedAnswers(levelId, solvedAnswers);
-  state.stars += 1;
+  syncStars();
   currentEntry = "";
   selectedAnswer = null;
 
@@ -440,7 +507,13 @@ function solveWord(levelId, answer, clue) {
   saveState();
   render();
 
-  if (allSolved && levelId < LEVELS.length) {
+  if (purchasedSolution && allSolved && levelId < LEVELS.length) {
+    setStatus(`„${answer}“ als Lösung freigeschaltet. Level abgeschlossen. Nächstes Level ist frei.`);
+  } else if (purchasedSolution && allSolved) {
+    setStatus(`„${answer}“ als Lösung freigeschaltet. Alle ${LEVELS.length} Level sind geschafft.`);
+  } else if (purchasedSolution) {
+    setStatus(`„${answer}“ als Lösung freigeschaltet. 10 Sterne ausgegeben.`);
+  } else if (allSolved && levelId < LEVELS.length) {
     setStatus(`„${answer}“ gelöst. Level abgeschlossen. Nächstes Level ist frei.`);
   } else if (allSolved) {
     setStatus(`„${answer}“ gelöst. Alle ${LEVELS.length} Level sind geschafft.`);
@@ -450,16 +523,23 @@ function solveWord(levelId, answer, clue) {
 }
 
 function unlockHint(answer) {
-  if (state.stars < 1) {
-    setStatus("Dir fehlt ein Stern für den nächsten Hinweis.");
-    return;
-  }
+  syncStars();
 
   const level = getCurrentLevel();
   const nextStage = getHintStage(level.id, answer) + 1;
+  const cost = getHintUnlockCost(nextStage);
+
+  if (!cost) {
+    return;
+  }
+
+  if (state.stars < cost) {
+    setStatus(`Dir fehlen ${cost} Sterne für den nächsten Hinweis.`);
+    return;
+  }
 
   setHintStage(level.id, answer, nextStage);
-  state.stars -= 1;
+  syncStars();
   saveState();
   render();
 
@@ -468,6 +548,30 @@ function unlockHint(answer) {
   } else {
     setStatus("Hinweis 3 freigeschaltet.");
   }
+}
+
+function buySolution(answer) {
+  const level = getCurrentLevel();
+  const word = level.words.find((entry) => entry.answer === answer);
+
+  if (!word) {
+    return;
+  }
+
+  if (getHintStage(level.id, answer) < 2) {
+    setStatus("Schalte erst beide Hinweise frei.");
+    return;
+  }
+
+  syncStars();
+
+  if (state.stars < 10) {
+    setStatus("Dir fehlen 10 Sterne für die Lösung.");
+    return;
+  }
+
+  setHintStage(level.id, answer, 3);
+  solveWord(level.id, answer, word.clue, { purchasedSolution: true });
 }
 
 function moveToNextLevel() {
